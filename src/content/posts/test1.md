@@ -110,8 +110,6 @@ writes: 字典  numbwritten: 已经打印的字符数  write_size: 以几字节�
 
 ### ELF保护机制
 
-![image-20260427160135285](技术栈.assets/image-20260427160135285.png)
-
 ### 爆破canary脚本
 
 ```
