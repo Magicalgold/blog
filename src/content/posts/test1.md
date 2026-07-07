@@ -51,16 +51,14 @@ binsh_addr = base + next(libc.search(b'/bin/sh'))
 用LibcSearcher时
 system_addr = base + libc.dump('system')
 binsh_addr = base + libc.dump('str_bin_sh')
-```python:
-
-查看沙箱过滤的函数:   
+```
 
 ```
+查看沙箱过滤的函数:  
 seccomp-tools dump ./pwn 
-
 ```
 
-ld版本切换指令:   
+ld版本切换指令:
 
 ```
 patchelf --set-interpreter ./ld-linux-x86-64.so.2 ./pwn#pwn是文件名，前面是你想换成的ld名
@@ -112,7 +110,7 @@ writes: 字典  numbwritten: 已经打印的字符数  write_size: 以几字节�
 
 ### 爆破canary脚本
 
-```
+```python:
 p.recvuntil(b'welcome\n')
 
 canary = b'\x00'
@@ -137,7 +135,7 @@ for k in range(3):
             break
 ```
 
-栈迁移
+### 栈迁移
 
 若只有一个溢出点且不能重复,需考虑多次栈迁移
 
@@ -145,13 +143,11 @@ for k in range(3):
 
 基本原理:异常处理函数输出错误信息时含有文件名 , 通过栈溢出精准覆盖文件名为某后门地址即可打印出信息
 
-找文件名地址   
+找文件名地址:
 
-```
+```python:
  p & __libc_argv[0]
 ```
-
-
 
 ## off-by-one
 
@@ -159,19 +155,15 @@ for k in range(3):
 
 覆盖其他特殊地址，如关键结构体指针，可能导致结构体被篡改，流程改变，进而输出敏感内容
 
-
-
 ## House of force
 
 前提：存在堆利用可以修改top_chunk的size
 
-​	    用户能自由分配malloc的申请大小（以向前回绕）
+​     用户能自由分配malloc的申请大小（以向前回绕）
 
 通过修改top_chunk的size大小，常改为-1，以达到后面有很大的堆空间的假象，进而通过申请超大内存将top指针指向任意地址，再申请大堆块以实现任意地址堆块申请。
 
 如需向前申请需要通过整数溢出，精确计算申请大小（以修改top为-1为例）：公式为： —(目标地址+size+0xf）
-
-
 
 ## Use After Free
 
@@ -179,9 +171,7 @@ for k in range(3):
 
 不设就会成为悬空指针,如果对其进异常写入,在重新申请到该区域,可能导致被异常执行
 
-
-
-##  unsortedbin的unlink
+## unsortedbin的unlink
 
 通常通过伪造堆块,将某敏感内存区域写进bins,然后释放中间堆块,导致敏感区域建立上下堆块联系,进而控制该区内容,导致got表篡改或程序流异常执行
 
@@ -190,4 +180,3 @@ for k in range(3):
 通过对同一个堆块释放2次(形成chunk1->chunk2->chunk1)
 
 然后申请到chunk1,使得bin的头直接指向循环链表,然后将chunk1的fd修改成敏感地址,然后就可以实现任意地址申请
-标题
