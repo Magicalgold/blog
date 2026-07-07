@@ -1,9 +1,9 @@
 ---
-title: 测试文章
+title: 杂记
 published: 2026-07-06
-description: 测试
-tags: [堆栈,CTF]
-category: 博客指南
+description: CTF比赛PWN中涉及的一些常用指令和一些简单知识点
+tags: [CTF,PWN,Libc]
+category: CTF
 draft: false
 ---
 
