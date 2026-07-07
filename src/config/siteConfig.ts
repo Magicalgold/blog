@@ -35,7 +35,7 @@ export const siteConfig: SiteConfig = {
 		// 主题色的默认色相，范围从 0 到 360。例如：红色：0，青色：200，蓝绿色：250，粉色：345
 		hue: 250,
 		// 是否对访问者隐藏主题色选择器
-		fixed: false,
+		fixed: true,
 		// 默认模式："light" 亮色，"dark" 暗色，"system" 跟随系统
 		defaultMode: "dark",
 	},
@@ -59,7 +59,7 @@ export const siteConfig: SiteConfig = {
 			// 图标文件路径
 			src: "/favicon/favicon.ico",
 			// 可选，指定主题 'light' | 'dark'
-			// theme: "light",
+			//theme: "dark",
 			// 可选，图标大小
 			// sizes: "32x32",
 		},
@@ -74,8 +74,8 @@ export const siteConfig: SiteConfig = {
 		// 3. 本地图片（src目录，自动优化但会增加构建时间）: { type: "image", value: "assets/images/logo.webp", alt: "Logo" }
 		// 4. 网络图片: { type: "url", value: "https://example.com/logo.png", alt: "Logo" }
 		logo: {
-			type: "image",
-			value: "assets/images/firefly.png",
+			type: "icon",
+			value: "fa7-brands:unity",
 			alt: "",
 		},
 		// 导航栏标题
@@ -102,13 +102,13 @@ export const siteConfig: SiteConfig = {
 		// 友链页面开关
 		friends: true,
 		// 打赏页面开关
-		sponsor: true,
+		sponsor: false,
 		// 留言板页面开关，需要配置评论系统
 		guestbook: true,
 		// 番组计划页面开关，含追番、游戏、书籍和音乐
 		bangumi: false,
 		// 相册页面开关
-		gallery: true,
+		gallery: false,
 		// 追番页面开关
 		anime: false,
 	},
@@ -130,11 +130,11 @@ export const siteConfig: SiteConfig = {
 		// 文章简介显示行数，设为 0 则不截断
 		descriptionLines: 2,
 		// 是否允许用户切换布局
-		allowSwitch: true,
+		allowSwitch: false,
 		// 网格布局配置，仅在 defaultMode 为 "grid" 或允许切换布局时生效
 		grid: {
 			// 是否开启瀑布流布局，同时有封面图和无封面图的混合文章推荐开启
-			masonry: false,
+			masonry: true,
 			// 网格模式卡片最小宽度(px)，浏览器根据容器宽度自动计算列数
 			columnWidth: 320,
 		},
@@ -153,9 +153,9 @@ export const siteConfig: SiteConfig = {
 		// 文章页底部的"上次编辑时间"卡片开关
 		showLastModified: true,
 		// 文章过期阈值（天数），超过此天数才显示"上次编辑"卡片
-		outdatedThreshold: 30,
+		outdatedThreshold: 15,
 		// 是否开启分享海报生成功能
-		sharePoster: true,
+		sharePoster: false,
 		// OpenGraph图片功能，注意开启后要渲染很长时间，不建议本地调试的时候开启
 		generateOgImages: false,
 	},

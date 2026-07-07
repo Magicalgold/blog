@@ -1,29 +1,16 @@
 # 关于我 / About Me
 
-你好！我是 **夏叶** ，一个在数字世界中默默无闻的一片叶子。
+你好！我是 **magical gold** ，
 
-## 🛠️ 关于本站
+  一名不合格的二进制CTFer,目标是国内一线的kernel研究员
 
-这个网站使用 **Astro** 框架构建，采用了 [Firefly](https://github.com/CuteLeaf/Firefly) 模板，Firefly 是基于 [Fuwari](https://github.com/saicaca/fuwari) 的二次开发。
+  我的家境并不富裕,在村里长大,我非常感谢我的父母培育我成长,他们只是普通的农民,但在教育上十分重视,舍得花钱培养我,我的家族也很普通,经典的三代贫农家族,而我又是家族中的男性的老大,所以我要努力,不辜负家里几代人的积累;
 
-**Firefly** 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代 Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。
+  我是一个很自傲的人,但是来到大学,我发现什么比我优秀的人数不胜数,我时常思考,他们为什么有这么高的效率,为什么他们如此优秀,我的自信心也开始被打磨,这也许就是小镇做题家来到城市必定要经历的心路历程吧;
+
+  我也时常宽慰自己,但始终无法改变心中的自傲,于是我决定创建这个博客,努力学习,记录自己的成长,给予自己一些自信,希望给多年之后的自己留下回忆,也希望未来的自己再回看时,能拥有轻舟已过万重山的心境,不在彷徨与焦虑,
 
 
-**🖥️在线预览： [Firefly - Demo site](https://firefly.cuteleaf.cn/)**
 
-**🏠我的博客： [https://blog.cuteleaf.cn](https://blog.cuteleaf.cn/)**
-
-**📝Firefly使用文档： [https://docs-firefly.cuteleaf.cn](https://docs-firefly.cuteleaf.cn/)**
-
-**⭐Firefly开源地址：[https://github.com/CuteLeaf/Firefly](https://github.com/CuteLeaf/Firefly)** 
-
-**⭐Fuwari开源地址：[https://github.com/saicaca/fuwari](https://github.com/saicaca/fuwari)**
-
-::github{repo="CuteLeaf/Firefly"}
-
-::github{repo="saicaca/fuwari"}
-
----
-
-*感谢你的来访！希望在这里能找到对你有用的内容！*
+*感谢你的来访,希望未来我们一同进步！*
 

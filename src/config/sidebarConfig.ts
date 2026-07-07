@@ -59,20 +59,10 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			showOnPostPage: true,
 		},
 		{
-			// 组件类型：音乐播放器
-			type: "music",
-			// 是否启用该组件
-			enable: true,
-			// 组件位置
-			position: "sticky",
-			// 是否在文章详情页显示
-			showOnPostPage: true,
-		},
-		{
 			// 组件类型：分类组件
 			type: "categories",
 			// 是否启用该组件
-			enable: true,
+			enable: false,
 			// 组件位置
 			position: "sticky",
 			// 是否在文章详情页显示
@@ -81,21 +71,6 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			specificConfig: {
 				// 折叠阈值：当分类数量超过>5个时自动折叠
 				collapseThreshold: 5,
-			},
-		},
-		{
-			// 组件类型：标签组件
-			type: "tags",
-			// 是否启用该组件
-			enable: true,
-			// 组件位置
-			position: "sticky",
-			// 是否在文章详情页显示
-			showOnPostPage: true,
-			// 组件专属配置
-			specificConfig: {
-				// 折叠阈值：当标签数量超过>10个时自动折叠
-				collapseThreshold: 10,
 			},
 		},
 	],
@@ -113,10 +88,25 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			showOnPostPage: true,
 		},
 		{
+			// 组件类型：标签组件
+			type: "tags",
+			// 是否启用该组件
+			enable: true,
+			// 组件位置
+			position: "sticky",
+			// 是否在文章详情页显示
+			showOnPostPage: true,
+			// 组件专属配置
+			specificConfig: {
+				// 折叠阈值：当标签数量超过>10个时自动折叠
+				collapseThreshold: 10,
+			},
+		},
+		{
 			// 组件类型：站点信息组件
 			type: "siteInfo",
 			// 是否启用该组件
-			enable: true,
+			enable: false,
 			// 组件位置
 			position: "top",
 			// 是否在文章详情页显示
@@ -130,10 +120,25 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			},
 		},
 		{
+			// 组件类型：分类组件
+			type: "categories",
+			// 是否启用该组件
+			enable: true,
+			// 组件位置
+			position: "sticky",
+			// 是否在文章详情页显示
+			showOnPostPage: true,
+			// 组件专属配置
+			specificConfig: {
+				// 折叠阈值：当分类数量超过>5个时自动折叠
+				collapseThreshold: 5,
+			},
+		},
+		{
 			// 组件类型：日历组件
 			type: "calendar",
 			// 是否启用该组件
-			enable: true,
+			enable: false,
 			// 是否显示组件标题
 			showTitle: false,
 			// 组件位置

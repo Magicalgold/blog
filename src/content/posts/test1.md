@@ -2,9 +2,8 @@
 title: 测试文章
 published: 2026-07-06
 description: 测试
-image: ./cover.jpg
 tags: [堆栈,CTF]
-category: 技术栈
+category: 博客指南
 draft: false
 ---
 
@@ -12,7 +11,7 @@ draft: false
 
 ## wsrx到本地端口命令
 
-```
+```python:
 wsrx connect \
   --host 127.0.0.1 \
   --port 12345 \
@@ -27,23 +26,23 @@ pkill -f 'wsrx connect'
 
 ### 堆版本查询及切换
 
-```
+```python:
 查询 strings libc.so.6 | grep GNU
 切换ld和.so文件
 cp heap theap
 patchelf --set-interpreter ./ld.so.2 --set-rpath '$ORIGIN' theap
 ```
 
+```python:
 金丝雀处理语法:    
 
-```
  `终端输出 canary = u64(io.recv(8).ljust(8,b'\x00')) & (0xffffffffffffff00)`
   %p输出 canary=int(io.recv(18),16)
 ```
 
 libc处理方法:
 
-```
+```python:
 64位接收 puts_addr = u64(p.recvuntil('\xf7')[-6:].ljust(8,b'\x00'))
 32位接收 puts_addr = u32(io.recvuntil('\xf7')[-4:])
 直接引入libc库时
@@ -52,12 +51,13 @@ binsh_addr = base + next(libc.search(b'/bin/sh'))
 用LibcSearcher时
 system_addr = base + libc.dump('system')
 binsh_addr = base + libc.dump('str_bin_sh')
-```
+```python:
 
 查看沙箱过滤的函数:   
 
 ```
 seccomp-tools dump ./pwn 
+
 ```
 
 ld版本切换指令:   
@@ -190,3 +190,4 @@ for k in range(3):
 通过对同一个堆块释放2次(形成chunk1->chunk2->chunk1)
 
 然后申请到chunk1,使得bin的头直接指向循环链表,然后将chunk1的fd修改成敏感地址,然后就可以实现任意地址申请
+标题
