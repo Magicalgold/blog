@@ -154,18 +154,18 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 	overlay: {
 		// 是否允许用户通过控制面板调整全屏透明模式参数
 		switchable: {
-			opacity: false,
-			blur: false,
-			cardOpacity: false,
+			opacity: true,
+			blur: true,
+			cardOpacity: true,
 		},
 		// 层级，确保壁纸在背景层
 		zIndex: -1,
 		// 壁纸透明度
-		opacity: 100,
+		opacity: 0.8,
 		// 背景模糊度
-		blur: 0,
+		blur: 2.0,
 		// 卡片透明度，0-1之间，值越小越透明
-		cardOpacity: 0.7,
+		cardOpacity: 0.70,
 	},
 	// 全屏壁纸模式特有配置
 	fullscreen: {
