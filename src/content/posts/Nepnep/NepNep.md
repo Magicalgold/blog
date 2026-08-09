@@ -1,3 +1,12 @@
+---
+title: Nepnep2026
+published: 2026-08-09
+description: Nepnep2026 pwn方向WP
+tags: [CTF,PWN,Libc]
+category: CTF
+draft: false
+---
+
 # 2026NepNep招新赛
 
 ## **shadow_signal**
