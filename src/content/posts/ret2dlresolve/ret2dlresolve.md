@@ -1,3 +1,4 @@
+---
 title: ret2dlresolve
 published: 2026-09-07
 description: 本文简述了ret2dlresolve的详细过程,非常复杂,但是可以让我们对程序执行有更深层次的理解
@@ -5,6 +6,7 @@ tags: [CTF,PWN,Libc]
 category: CTF
 draft: false
 ---
+
 ## ret2dlresolve
 
 核心就是动态链接的过程,可以说过程非常复杂,涉及到大量结构体和大量glibc源码,在说明一下流程前先需要知道一些基础:
