@@ -81,7 +81,7 @@ draft: false
    } Elf64_Sym;
    ```
 
-   	![image-20260822164839734](技术栈.assets/image-20260822164839734.png)
+   	![image-20260822164839734](ret2dlresolve.assets/image-20260822164839734.png)
 
    3. **.rela.plt--DT_JMPREL--0x4005d0h--ELF JMPREL Relocation Table(跳转重定位表)**
 
