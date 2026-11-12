@@ -1,8 +1,8 @@
 ---
-title: Nepnep2026
+title: NepNep2026
 published: 2026-08-09
 description: Nepnep2026 pwn方向WP
-tags: [CTF,PWN,Libc]
+tags: [CTF,PWN,Libc,stack,heap]
 category: CTF
 draft: false
 ---
@@ -360,7 +360,7 @@ setresuid(1000,1000,1000);
 然后进入偏移13b9,注意这里是管道内写入一个字节,49对应ascll码的1 这个1也是子进程执行的信号
 
 ```
-`sub_13B9((unsigned int)pipedes[1], &v4, 1);`
+sub_13B9((unsigned int)pipedes[1], &v4, 1);`
 ```
 
 随后关闭这个管道,等待从fd[0]处读取6字节,然后判断字符是否是Nepnep,如果是则输出我们的flag
@@ -536,11 +536,11 @@ print(result.decode(errors="replace"))
 
 先随便写一个target,通过gdb调试子进程,进菜单时候就pause(),然后在0x1bbb处下断点,执行到此处后看一下栈帧rsp再上面8个字节的位置就是ret的地址,然后根据之前的栈地址算出固定偏移最终应该是0x1e0
 
-![image-20260808172824357](NepNep.assets/image-20260808172824357.png)
+![image-20261111210433781](NepNep.assets/image-20261111210433781.png)
 
-![image_153](NepNep.assets/image_153.png)
+![image-20261111210330509](NepNep.assets/image-20261111210330509.png)
 
-此为我用0x100的偏移测试最终 `fa8-dc8` 为 `0x1e0`
+最终 `ee8-df8` 为 `0x1f0` 但是因为我们要申请堆块,要给堆头留0x10的空间,所以最终的偏移是 **0x1e0**
 
 最后用第二次poke的机会把这个返回地址写入链表,然后add申请后即可向返回地址处写出rop,rop被读取后write返回时就会返回到我们的rop然后执行,从而把我们的Nepnep写到fd[1]
 

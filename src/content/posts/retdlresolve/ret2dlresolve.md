@@ -1,8 +1,8 @@
 ---
 title: ret2dlresolve
 published: 2026-09-07
-description: 本文简述了ret2dlresolve的详细过程,非常复杂,但是可以让我们对程序执行有更深层次的理解
-tags: [CTF,PWN,Libc]
+description: 啃了2天终于啃下来了,写一篇解析给大家,主要是源码和流程分析,比较底层
+tags: [CTF,PWN,Libc,stack]
 category: CTF
 draft: false
 ---
@@ -79,14 +79,15 @@ draft: false
        Elf64_Addr st_value;    // 函数的libc偏移
        Elf64_Xword st_size;
    } Elf64_Sym;
+   
    ```
-
-   	![image-20260822164839734](ret2dlresolve.assets/image-20260822164839734.png)
-
+   
+   ![image-20260822164839734](ret2dlresolve.assets/image-20260822164839734.png)
+   
    3. **.rela.plt--DT_JMPREL--0x4005d0h--ELF JMPREL Relocation Table(跳转重定位表)**
-
+   
       每一项明显都是同一个数据结构,这也是一个结构体数组,**这个数组的下标有特殊用处**
-
+   
    ```
    typedef struct
    {
@@ -95,17 +96,17 @@ draft: false
    	Elf64_Sword	r_addend; 
    } Elf64_Rela; 大小为0x18
    ```
-
-   	r_info实际上由2部分构成,例如0x100000007  1代表**dynsym 索引**(symbol_index)   7代表重定位类型编号(字面意思,比如外部全	局变量重定位就用6表示)
-
+   
+   	r_info实际上由2部分构成,例如0x100000007  1代表**dynsym 索引**(symbol_index)   7代表重定位类型编号(字面意思,比如外部全局变量重定位就用6表示)
+   
    ![image-20260822213614433](ret2dlresolve.assets/image-20260822213614433.png)
-
+   
    到这里你可能有点乱,没关系,下面讲解动态链接的过程时,就会依次用到这些表你就能串起来了
-
+   
    ### Link_map
-
+   
    link_map是一个链表结构体,他用于记录各种链接的库或者模块的基本信息
-
+   
    ```
    struct link_map {
        Elf64_Addr l_addr;   #该模块加载进来的base地址(就像libc地址)
@@ -118,12 +119,14 @@ draft: false
        ...
    };
    ```
-
+   
      这个l_info[]举个例子，比如源码看到`l_info[DT_SYMTAB]` 这个数组存储的就是.dynamic中的DT_SYMTAB的地址(上面图的0x601eb0),这实际上就是相当于我们把这个.dynamic这块内存做成数组,当我们需要访问时,直接通过l_info[]即可访问,不需要通过l_ld获取到首地址后再遍历去找
 
 ### 链接流程分析: 
 
-当首次调用某个libc函数时,例如`call printf`  首先程序会先跳转到对应函数的.plt地址,即下方的那些`push 0 jmp` `push 1 jmp` 这个数字0 1 2,我们叫做**reloc_index**或者**reloc_arg**,这个数字很重要
+当首次调用某个libc函数时,例如`call printf`  首先程序会先跳转到对应函数的.plt地址,即下方的那些`push 0 jmp` `push 1 jmp` 这个数字0 1 2,我们叫做**reloc_index**或者**reloc_arg**,这个数字很重要。
+
+还有,注意到**0x4060f0->0x4060f6**这段地址,ida没有给出汇编指令,这里实际上有一个跳到got表去判断内容是不是空的,如果是空的,才会跳转回来继续push
 
 ![image-20260822141816713](ret2dlresolve.assets/image-20260822141816713.png)
 
@@ -253,13 +256,17 @@ const ElfW(Sym) *const symtab
 
 注意`l`是我们传进来的那个link_map的指针,`reloc_arg`是我们在plt表push的那个数字
 
-D_PTR函数不单独说了,函数逻辑就是返回`l->l_info[]`的值,就是.dynstr和.dynsym的首地址
+D_PTR函数不单独说了,函数逻辑就是返回`l->l_info[]->d_ptr`的值,就是.dynsym的首地址(这里可以再往上翻一翻第一张截图)
 
-第三个reloc就是函数在.rela_plt的地址里面的reloc_offset就是reloc_arg*0x18(实际上就是Elf64_Rela结构体大小) 可以回头看一下当时的图
+strtab就是那个存放函数名ascll码的首地址
 
-然后取r_info的dynsym 索引,就拿到对应函数在dynsym的地址(之前提到过 r_info 高8位是索引,低8位是重定向类型)
+第三个reloc就是.rela_plt的起始地址+reloc_offset就是reloc_arg*0x18(Elf64_Rela结构体大小,reloc_arg是我们从plt那里push的数字) 可以回头看一下当时的图
 
-最后的rel_addr实际上就是这个函数的plt.got地址
+sym是取r_info的dynsym索引,就相当于拿到对应函数在dynsym的地址(之前提到过 r_info 高8位是索引,低8位是重定向类型)
+
+最后的rel_addr就是这个函数的plt.got地址
+
+**这里实际上就把前面3个表串起来了,我们需要先通过.rela_plt这个段的结构体,里面存储着该函数在dynsym表的索引,然后dynsym表的结构体里面又存储着该函数在dynstr的偏移,最终我们在dynstr就能拿到这个函数的ascll码了,后面我们也是根据这个ascll码这个函数名去libc找函数**
 
 #### 第二部分
 
